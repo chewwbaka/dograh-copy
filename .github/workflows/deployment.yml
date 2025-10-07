@@ -29,36 +29,41 @@ jobs:
       - name: Link Vercel Project
         run: |
           cd ui
-          vercel link --yes --project=${{ secrets.VERCEL_PROJECT_ID }} --token=${{ secrets.VERCEL_TOKEN }}
+          vercel link --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       
       - name: Pull Vercel Environment Information
         run: |
           cd ui
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel pull --yes --environment=production
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       
       - name: Build Project Artifacts
         run: |
           cd ui
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       
       - name: Deploy to Vercel Production
         run: |
           cd ui
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod)
           echo "Deployed to: $DEPLOYMENT_URL"
           echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
         id: deploy
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       
       - name: Comment on Release
         uses: actions/github-script@v7
