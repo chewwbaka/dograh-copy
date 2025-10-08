@@ -1,9 +1,8 @@
 name: Build and Push Docker Images
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 # Ensure only one workflow run per branch at a time; cancel any in-progress runs on new push
 concurrency:
