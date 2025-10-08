@@ -2,7 +2,7 @@
 
 import { Calendar, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import TimezoneSelect, { type ITimezoneOption } from 'react-timezone-select';
 
 import { getCurrentPeriodUsageApiV1OrganizationsUsageCurrentPeriodGet, getDailyUsageBreakdownApiV1OrganizationsUsageDailyBreakdownGet,getUsageHistoryApiV1OrganizationsUsageRunsGet } from '@/client/sdk.gen';
@@ -61,18 +61,11 @@ export default function UsagePage() {
     // Media preview dialog
     const mediaPreview = MediaPreviewDialog({ accessToken });
 
-    // Timezone state - wait for userConfig to load before setting default
+    // Timezone state - initialize with empty string to avoid hydration mismatch
     const localTimezone = getLocalTimezone();
-    const [selectedTimezone, setSelectedTimezone] = useState<ITimezoneOption | string>(() => {
-        // Only use local timezone if we know for sure there's no saved timezone
-        // (i.e., userConfig has loaded and has no timezone)
-        if (!userConfigLoading && !userConfig?.timezone) {
-            return localTimezone;
-        }
-        // Otherwise return the saved timezone or empty string while loading
-        return userConfig?.timezone || '';
-    });
+    const [selectedTimezone, setSelectedTimezone] = useState<ITimezoneOption | string>('');
     const [savingTimezone, setSavingTimezone] = useState(false);
+    const timezoneSelectId = useId(); // Stable ID for react-select to prevent hydration mismatch
 
     // Fetch current usage
     const fetchCurrentUsage = useCallback(async () => {
@@ -316,18 +309,18 @@ export default function UsagePage() {
     };
 
     return (
-        <div className="min-h-[calc(100vh-73px)] bg-gray-50 p-6">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-6">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">Usage Dashboard</h1>
-                            <p className="text-gray-600">Monitor your Dograh Token usage and quota</p>
-                        </div>
+        <div className="container mx-auto p-6 space-y-6">
+            <div>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Usage Dashboard</h1>
+                        <p className="text-gray-600">Monitor your Dograh Token usage and quota</p>
+                    </div>
                         <div className="flex items-center gap-2">
                             <Globe className="h-4 w-4 text-gray-500" />
                             <div className="w-[300px]">
                                 <TimezoneSelect
+                                    instanceId={timezoneSelectId}
                                     value={selectedTimezone}
                                     onChange={handleTimezoneChange}
                                     isDisabled={savingTimezone || userConfigLoading}
@@ -408,14 +401,6 @@ export default function UsagePage() {
                                         Total Duration: <span className="font-medium text-gray-900">{formatDuration(currentUsage.total_duration_seconds)}</span>
                                     </div>
                                 </div>
-
-                                {!currentUsage.quota_enabled && (
-                                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                                        <p className="text-sm text-yellow-800">
-                                            Quota enforcement is not enabled for your organization.
-                                        </p>
-                                    </div>
-                                )}
                             </div>
                         ) : (
                             <p className="text-gray-500">Unable to load usage data</p>
@@ -583,7 +568,6 @@ export default function UsagePage() {
 
                 {/* Media Preview Dialog */}
                 {mediaPreview.dialog}
-            </div>
         </div>
     );
 }
