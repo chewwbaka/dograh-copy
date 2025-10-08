@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.1.0...dograh-copy-v1.1.1) (2025-10-08)
+
+
+### Bug Fixes
+
+* add newline to README for formatting ([1f19096](https://github.com/chewwbaka/dograh-copy/commit/1f19096042ff94f4c5e585dcb27070514c8b46b3))
+
 ## [1.1.0](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.0.0...dograh-copy-v1.1.0) (2025-10-08)
 
 
