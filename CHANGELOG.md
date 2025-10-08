@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.1.1...dograh-copy-v1.2.0) (2025-10-08)
+
+
+### Features
+
+* refactor autmation workflows ([95105ad](https://github.com/chewwbaka/dograh-copy/commit/95105ade80291f2dc2b5599c241f525973f571a4))
+
 ## [1.1.1](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.1.0...dograh-copy-v1.1.1) (2025-10-08)
 
 
