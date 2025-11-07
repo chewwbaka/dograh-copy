@@ -8,10 +8,34 @@ jobs:
   notify-slack:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug GitHub Event
+        run: |
+          echo "=== Full GitHub Event JSON ==="
+          echo '${{ toJSON(github.event) }}' | jq '.'
+          echo ""
+          echo "=== Discussion Object ==="
+          echo '${{ toJSON(github.event.discussion) }}' | jq '.'
+          echo ""
+          echo "=== Category Details ==="
+          echo "Category Name: ${{ github.event.discussion.category.name }}"
+          echo "Category Slug: ${{ github.event.discussion.category.slug }}"
+          echo "Category ID: ${{ github.event.discussion.category.id }}"
+          
       - name: Check if announcement
         id: check
         run: |
-          # GitHub API check to verify it's in announcements category
+          # Check if the discussion is in the announcements category
+          CATEGORY="${{ github.event.discussion.category.slug }}"
+          echo "Detected category slug: '$CATEGORY'"
+          
+          # Check for both possible variations
+          if [ "$CATEGORY" = "announcements" ] || [ "$CATEGORY" = "announcement" ]; then
+            echo "✅ This is an announcement discussion"
+            echo "is_announcement=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ This is NOT an announcement discussion (category: $CATEGORY)"
+            echo "is_announcement=false" >> $GITHUB_OUTPUT
+          fi
           
       - name: Post to Slack
         if: steps.check.outputs.is_announcement == 'true'
