@@ -11,20 +11,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install requirements
-COPY requirements.txt .
+COPY api/requirements.txt .
 
 # Install dependencies to user directory for easy copying
 RUN pip install --user --no-cache-dir -r requirements.txt && \
     # Clean up pip cache after installation
     rm -rf /root/.cache/pip
 
-# Force reinstall of pipecat on every build (cache bust)
+# Copy and install pipecat from local submodule
+COPY pipecat /tmp/pipecat
+RUN pip install --user --no-cache-dir '/tmp/pipecat[cartesia,deepgram,openai,elevenlabs,groq,google,azure,soundfile,silero,webrtc]' && \
+    # Clean up pip cache and temporary pipecat directory
+    rm -rf /root/.cache/pip /tmp/pipecat
 
-ARG CACHEBUST=1
-RUN pip install --user 'git+https://github.com/dograh-hq/pipecat.git@f88c8a0#egg=pipecat-ai[cartesia,deepgram,openai,elevenlabs,groq,google,azure,soundfile,silero,webrtc]' && \
-    # Clean up pip cache after pipecat installation
-    rm -rf /root/.cache/pip
-
+    
 # Remove unnecessary Python cache files from installed packages
 RUN find /root/.local -type f -name '*.pyc' -delete && \
     find /root/.local -type d -name '__pycache__' -delete && \
@@ -53,7 +53,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 # Copy application code
-COPY . ./api
+COPY ./api ./api
+COPY ./scripts/start_services.sh ./scripts/start_services.sh
 
 ENV PYTHONPATH=/app
 
@@ -61,4 +62,4 @@ ENV PYTHONPATH=/app
 EXPOSE 8000
 
 # Run the FastAPI app with uvicorn
-CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash", "-c", "./scripts/start_services.sh && tail -f ./logs/latest/*.log"]

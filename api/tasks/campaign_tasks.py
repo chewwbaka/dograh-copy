@@ -10,7 +10,7 @@ from api.services.campaign.campaign_event_protocol import BatchFailedEvent
 from api.services.campaign.campaign_event_publisher import (
     get_campaign_event_publisher,
 )
-from api.services.campaign.source_sync import get_sync_service
+from api.services.campaign.source_sync_factory import get_sync_service
 
 
 async def sync_campaign_source(ctx: Dict, campaign_id: int) -> None:
@@ -177,7 +177,7 @@ async def monitor_campaign_progress(ctx: Dict, campaign_id: int) -> None:
         failed_calls = 0
 
         for run in workflow_runs:
-            callbacks = run.logs.get("twilio_status_callbacks", [])
+            callbacks = run.logs.get("telephony_status_callbacks", [])
             if callbacks:
                 final_status = callbacks[-1].get("status", "").lower()
                 if final_status == "completed":

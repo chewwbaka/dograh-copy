@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { PhoneInput } from 'react-international-phone';
 
-import { getTelephonyConfigurationApiV1OrganizationsTelephonyConfigGet, initiateCallApiV1TwilioInitiateCallPost } from '@/client/sdk.gen';
+import { getTelephonyConfigurationApiV1OrganizationsTelephonyConfigGet, initiateCallApiV1TelephonyInitiateCallPost } from '@/client/sdk.gen';
 import { WorkflowError } from '@/client/types.gen';
 import { FlowEdge, FlowNode } from "@/components/flow/types";
 import { OnboardingTooltip } from '@/components/onboarding/OnboardingTooltip';
@@ -16,7 +16,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { WORKFLOW_RUN_MODES } from '@/constants/workflowRunModes';
 import { useOnboarding } from '@/context/OnboardingContext';
 import { useUserConfig } from "@/context/UserConfigContext";
-import { useAuth } from '@/lib/auth';
 
 interface WorkflowHeaderProps {
     isDirty: boolean;
@@ -26,6 +25,8 @@ interface WorkflowHeaderProps {
     workflowId: number;
     workflowValidationErrors: WorkflowError[];
     saveWorkflow: (updateWorkflowDefinition?: boolean) => Promise<void>;
+    user: { id: string; email?: string };
+    getAccessToken: () => Promise<string>;
 }
 
 const handleExport = (workflow_name: string, workflow_definition: ReactFlowJsonObject<FlowNode, FlowEdge> | undefined) => {
@@ -57,7 +58,7 @@ const handleExport = (workflow_name: string, workflow_definition: ReactFlowJsonO
     URL.revokeObjectURL(url);
 };
 
-const WorkflowHeader = ({ isDirty, workflowName, rfInstance, onRun, workflowId, workflowValidationErrors, saveWorkflow }: WorkflowHeaderProps) => {
+const WorkflowHeader = ({ isDirty, workflowName, rfInstance, onRun, workflowId, workflowValidationErrors, saveWorkflow, user, getAccessToken }: WorkflowHeaderProps) => {
     const router = useRouter();
     const { userConfig, saveUserConfig } = useUserConfig();
     const { hasSeenTooltip, markTooltipSeen } = useOnboarding();
@@ -70,7 +71,6 @@ const WorkflowHeader = ({ isDirty, workflowName, rfInstance, onRun, workflowId, 
     const [phoneChanged, setPhoneChanged] = useState(false);
     const [validationDialogOpen, setValidationDialogOpen] = useState(false);
     const [configureDialogOpen, setConfigureDialogOpen] = useState(false);
-    const { user, getAccessToken } = useAuth();
     const webCallButtonRef = useRef<HTMLButtonElement>(null);
 
     const hasValidationErrors = workflowValidationErrors.length > 0;
@@ -117,7 +117,8 @@ const WorkflowHeader = ({ isDirty, workflowName, rfInstance, onRun, workflowId, 
             });
 
             // If no configuration exists, show configure dialog
-            if (configResponse.error || !configResponse.data?.twilio) {
+            // Check if any telephony provider is configured (Twilio or Vonage)
+            if (configResponse.error || (!configResponse.data?.twilio && !configResponse.data?.vonage)) {
                 setConfigureDialogOpen(true);
                 return;
             }
@@ -151,8 +152,11 @@ const WorkflowHeader = ({ isDirty, workflowName, rfInstance, onRun, workflowId, 
             }
 
             // Configuration exists, proceed with call initiation
-            const response = await initiateCallApiV1TwilioInitiateCallPost({
-                body: { workflow_id: workflowId },
+            const response = await initiateCallApiV1TelephonyInitiateCallPost({
+                body: {
+                    workflow_id: workflowId,
+                    phone_number: phoneNumber
+                },
                 headers: { 'Authorization': `Bearer ${accessToken}` },
             });
 
@@ -207,39 +211,73 @@ const WorkflowHeader = ({ isDirty, workflowName, rfInstance, onRun, workflowId, 
                 </Tooltip>
             </TooltipProvider>
 
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleExport(workflowName, rfInstance.current?.toObject())}
-            >
-                <Download className="mr-2 h-4 w-4" />
-                Export Pathway
-            </Button>
-            <Button
-                ref={webCallButtonRef}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                    // Mark the tooltip as seen when the button is clicked
-                    if (!hasSeenTooltip('web_call')) {
-                        markTooltipSeen('web_call');
-                    }
-                    onRun(WORKFLOW_RUN_MODES.SMALL_WEBRTC);
-                }}
-                disabled={hasValidationErrors}
-            >
-                <Phone className="mr-2 h-4 w-4" />
-                Web Call
-            </Button>
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePhoneCallClick}
-                disabled={hasValidationErrors}
-            >
-                <Phone className="mr-2 h-4 w-4" />
-                Phone Call
-            </Button>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleExport(workflowName, rfInstance.current?.toObject())}
+                            disabled={isDirty || hasValidationErrors}
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            Export Pathway
+                        </Button>
+                    </span>
+                </TooltipTrigger>
+                {(isDirty || hasValidationErrors) && (
+                    <TooltipContent>
+                        {isDirty ? 'Save the workflow before exporting' : 'Fix validation errors before exporting'}
+                    </TooltipContent>
+                )}
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span>
+                        <Button
+                            ref={webCallButtonRef}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                // Mark the tooltip as seen when the button is clicked
+                                if (!hasSeenTooltip('web_call')) {
+                                    markTooltipSeen('web_call');
+                                }
+                                onRun(WORKFLOW_RUN_MODES.SMALL_WEBRTC);
+                            }}
+                            disabled={isDirty || hasValidationErrors}
+                        >
+                            <Phone className="mr-2 h-4 w-4" />
+                            Web Call
+                        </Button>
+                    </span>
+                </TooltipTrigger>
+                {(isDirty || hasValidationErrors) && (
+                    <TooltipContent>
+                        {isDirty ? 'Save the workflow before testing' : 'Fix validation errors before testing'}
+                    </TooltipContent>
+                )}
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handlePhoneCallClick}
+                            disabled={isDirty || hasValidationErrors}
+                        >
+                            <Phone className="mr-2 h-4 w-4" />
+                            Phone Call
+                        </Button>
+                    </span>
+                </TooltipTrigger>
+                {(isDirty || hasValidationErrors) && (
+                    <TooltipContent>
+                        {isDirty ? 'Save the workflow before making a call' : 'Fix validation errors before making a call'}
+                    </TooltipContent>
+                )}
+            </Tooltip>
 
             {isDirty ? (
                 <Button

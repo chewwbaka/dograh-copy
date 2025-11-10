@@ -16,9 +16,6 @@ ENABLE_TRACING = os.getenv("ENABLE_TRACING", "false").lower() == "true"
 ENABLE_RNNOISE = os.getenv("ENABLE_RNNOISE", "false").lower() == "true"
 
 BACKEND_API_ENDPOINT = os.getenv("BACKEND_API_ENDPOINT", None)
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", None)
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", None)
-TWILIO_DEFAULT_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER", None)
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 REDIS_URL = os.environ["REDIS_URL"]
@@ -43,5 +40,9 @@ S3_BUCKET = os.environ.get("S3_BUCKET")
 S3_REGION = os.environ.get("S3_REGION", "us-east-1")
 
 # Sentry configuration
-ENABLE_SENTRY = os.getenv("ENABLE_SENTRY", "false").lower() == "true"
 SENTRY_DSN = os.getenv("SENTRY_DSN")
+
+
+ENABLE_ARI_STASIS = os.getenv("ENABLE_ARI_STASIS", "false").lower() == "true"
+SERIALIZE_LOG_OUTPUT = os.getenv("SERIALIZE_LOG_OUTPUT", "false").lower() == "true"
+ENABLE_TELEMETRY = os.getenv("ENABLE_TELEMETRY", "false").lower() == "true"

@@ -72,6 +72,11 @@ export type CampaignResponse = {
     completed_at: string | null;
 };
 
+export type CampaignSourceDownloadResponse = {
+    download_url: string;
+    expires_in: number;
+};
+
 export type CampaignsResponse = {
     campaigns: Array<CampaignResponse>;
 };
@@ -91,6 +96,7 @@ export type CreateApiKeyResponse = {
 export type CreateCampaignRequest = {
     name: string;
     workflow_id: number;
+    source_type: string;
     source_id: string;
 };
 
@@ -258,6 +264,7 @@ export type ImpersonateResponse = {
 export type InitiateCallRequest = {
     workflow_id: number;
     workflow_run_id?: number | null;
+    phone_number?: string | null;
 };
 
 export type IntegrationResponse = {
@@ -285,6 +292,27 @@ export type LoadTestStatsResponse = {
     sessions: Array<{
         [key: string]: unknown;
     }>;
+};
+
+export type PresignedUploadUrlRequest = {
+    /**
+     * CSV filename
+     */
+    file_name: string;
+    /**
+     * File size in bytes (max 10MB)
+     */
+    file_size: number;
+    /**
+     * File content type
+     */
+    content_type?: string;
+};
+
+export type PresignedUploadUrlResponse = {
+    upload_url: string;
+    file_key: string;
+    expires_in: number;
 };
 
 export type RtcOfferRequest = {
@@ -363,6 +391,7 @@ export type SuperuserWorkflowRunsListResponse = {
  */
 export type TelephonyConfigurationResponse = {
     twilio?: TwilioConfigurationResponse | null;
+    vonage?: VonageConfigurationResponse | null;
 };
 
 export type TestSessionResponse = {
@@ -473,6 +502,45 @@ export type ValidationError = {
     loc: Array<string | number>;
     msg: string;
     type: string;
+};
+
+/**
+ * Request schema for Vonage configuration.
+ */
+export type VonageConfigurationRequest = {
+    provider?: string;
+    /**
+     * Vonage API Key
+     */
+    api_key?: string | null;
+    /**
+     * Vonage API Secret
+     */
+    api_secret?: string | null;
+    /**
+     * Vonage Application ID
+     */
+    application_id: string;
+    /**
+     * Private key for JWT generation
+     */
+    private_key: string;
+    /**
+     * List of Vonage phone numbers (without + prefix)
+     */
+    from_numbers: Array<string>;
+};
+
+/**
+ * Response schema for Vonage configuration with masked sensitive fields.
+ */
+export type VonageConfigurationResponse = {
+    provider: string;
+    application_id: string;
+    api_key: string | null;
+    api_secret: string | null;
+    private_key: string;
+    from_numbers: Array<string>;
 };
 
 export type WorkflowError = {
@@ -594,17 +662,17 @@ export type WorkflowTemplateResponse = {
     created_at: string;
 };
 
-export type InitiateCallApiV1TwilioInitiateCallPostData = {
+export type InitiateCallApiV1TelephonyInitiateCallPostData = {
     body: InitiateCallRequest;
     headers?: {
         authorization?: string | null;
     };
     path?: never;
     query?: never;
-    url: '/api/v1/twilio/initiate-call';
+    url: '/api/v1/telephony/initiate-call';
 };
 
-export type InitiateCallApiV1TwilioInitiateCallPostErrors = {
+export type InitiateCallApiV1TelephonyInitiateCallPostErrors = {
     /**
      * Not found
      */
@@ -615,9 +683,70 @@ export type InitiateCallApiV1TwilioInitiateCallPostErrors = {
     422: HttpValidationError;
 };
 
-export type InitiateCallApiV1TwilioInitiateCallPostError = InitiateCallApiV1TwilioInitiateCallPostErrors[keyof InitiateCallApiV1TwilioInitiateCallPostErrors];
+export type InitiateCallApiV1TelephonyInitiateCallPostError = InitiateCallApiV1TelephonyInitiateCallPostErrors[keyof InitiateCallApiV1TelephonyInitiateCallPostErrors];
 
-export type InitiateCallApiV1TwilioInitiateCallPostResponses = {
+export type InitiateCallApiV1TelephonyInitiateCallPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type HandleTwilioStatusCallbackApiV1TelephonyTwilioStatusCallbackWorkflowRunIdPostData = {
+    body?: never;
+    headers?: {
+        'x-webhook-signature'?: string | null;
+    };
+    path: {
+        workflow_run_id: number;
+    };
+    query?: never;
+    url: '/api/v1/telephony/twilio/status-callback/{workflow_run_id}';
+};
+
+export type HandleTwilioStatusCallbackApiV1TelephonyTwilioStatusCallbackWorkflowRunIdPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type HandleTwilioStatusCallbackApiV1TelephonyTwilioStatusCallbackWorkflowRunIdPostError = HandleTwilioStatusCallbackApiV1TelephonyTwilioStatusCallbackWorkflowRunIdPostErrors[keyof HandleTwilioStatusCallbackApiV1TelephonyTwilioStatusCallbackWorkflowRunIdPostErrors];
+
+export type HandleTwilioStatusCallbackApiV1TelephonyTwilioStatusCallbackWorkflowRunIdPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type HandleVonageEventsApiV1TelephonyVonageEventsWorkflowRunIdPostData = {
+    body?: never;
+    path: {
+        workflow_run_id: number;
+    };
+    query?: never;
+    url: '/api/v1/telephony/vonage/events/{workflow_run_id}';
+};
+
+export type HandleVonageEventsApiV1TelephonyVonageEventsWorkflowRunIdPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type HandleVonageEventsApiV1TelephonyVonageEventsWorkflowRunIdPostError = HandleVonageEventsApiV1TelephonyVonageEventsWorkflowRunIdPostErrors[keyof HandleVonageEventsApiV1TelephonyVonageEventsWorkflowRunIdPostErrors];
+
+export type HandleVonageEventsApiV1TelephonyVonageEventsWorkflowRunIdPostResponses = {
     /**
      * Successful Response
      */
@@ -1758,6 +1887,40 @@ export type GetCampaignProgressApiV1CampaignCampaignIdProgressGetResponses = {
 
 export type GetCampaignProgressApiV1CampaignCampaignIdProgressGetResponse = GetCampaignProgressApiV1CampaignCampaignIdProgressGetResponses[keyof GetCampaignProgressApiV1CampaignCampaignIdProgressGetResponses];
 
+export type GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetData = {
+    body?: never;
+    headers?: {
+        authorization?: string | null;
+    };
+    path: {
+        campaign_id: number;
+    };
+    query?: never;
+    url: '/api/v1/campaign/{campaign_id}/source-download-url';
+};
+
+export type GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetError = GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetErrors[keyof GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetErrors];
+
+export type GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CampaignSourceDownloadResponse;
+};
+
+export type GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetResponse = GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetResponses[keyof GetCampaignSourceDownloadUrlApiV1CampaignCampaignIdSourceDownloadUrlGetResponses];
+
 export type GetIntegrationsApiV1IntegrationGetData = {
     body?: never;
     headers?: {
@@ -1923,7 +2086,7 @@ export type GetTelephonyConfigurationApiV1OrganizationsTelephonyConfigGetRespons
 export type GetTelephonyConfigurationApiV1OrganizationsTelephonyConfigGetResponse = GetTelephonyConfigurationApiV1OrganizationsTelephonyConfigGetResponses[keyof GetTelephonyConfigurationApiV1OrganizationsTelephonyConfigGetResponses];
 
 export type SaveTelephonyConfigurationApiV1OrganizationsTelephonyConfigPostData = {
-    body: TwilioConfigurationRequest;
+    body: TwilioConfigurationRequest | VonageConfigurationRequest;
     headers?: {
         authorization?: string | null;
     };
@@ -2027,6 +2190,38 @@ export type GetFileMetadataApiV1S3FileMetadataGetResponses = {
 };
 
 export type GetFileMetadataApiV1S3FileMetadataGetResponse = GetFileMetadataApiV1S3FileMetadataGetResponses[keyof GetFileMetadataApiV1S3FileMetadataGetResponses];
+
+export type GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostData = {
+    body: PresignedUploadUrlRequest;
+    headers?: {
+        authorization?: string | null;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/v1/s3/presigned-upload-url';
+};
+
+export type GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostErrors = {
+    /**
+     * Not found
+     */
+    404: unknown;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostError = GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostErrors[keyof GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostErrors];
+
+export type GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: PresignedUploadUrlResponse;
+};
+
+export type GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostResponse = GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostResponses[keyof GetPresignedUploadUrlApiV1S3PresignedUploadUrlPostResponses];
 
 export type GetServiceKeysApiV1UserServiceKeysGetData = {
     body?: never;
