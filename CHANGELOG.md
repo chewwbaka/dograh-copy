@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.3.0](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.2.0...dograh-copy-v1.3.0) (2025-11-10)
+
+
+### Features
+
+* add chatwoot integration ([#39](https://github.com/chewwbaka/dograh-copy/issues/39)) ([5c1fe2c](https://github.com/chewwbaka/dograh-copy/commit/5c1fe2c6afc38327eac83515e8d9cc92b769fee8))
+* add csv upload functionality ([3babb5c](https://github.com/chewwbaka/dograh-copy/commit/3babb5ced61e259f480f8c0fdf225c57953fddf6))
+* add csv upload functionality for OSS ([#29](https://github.com/chewwbaka/dograh-copy/issues/29)) ([3babb5c](https://github.com/chewwbaka/dograh-copy/commit/3babb5ced61e259f480f8c0fdf225c57953fddf6))
+* add gmail integration for searching and reply to emails ([#34](https://github.com/chewwbaka/dograh-copy/issues/34)) ([6503d80](https://github.com/chewwbaka/dograh-copy/commit/6503d806c5b300e7685d64fc0fde5f9061ab2411))
+* add vonage telephony ([#35](https://github.com/chewwbaka/dograh-copy/issues/35)) ([4cfdc3d](https://github.com/chewwbaka/dograh-copy/commit/4cfdc3d420ac060ee32c82768ef864a1b4148126))
+* improve workflow builder UX ([#41](https://github.com/chewwbaka/dograh-copy/issues/41)) ([1a0a18a](https://github.com/chewwbaka/dograh-copy/commit/1a0a18a435279f57ad1095c27c205913a504fa8a))
+
+
+### Bug Fixes
+
+* arm arch build failure ([fbbbc43](https://github.com/chewwbaka/dograh-copy/commit/fbbbc43fb22dd5e68e5bd00d1a91bf368f2fcf3d))
+* fix npm build ([#43](https://github.com/chewwbaka/dograh-copy/issues/43)) ([8d05c9f](https://github.com/chewwbaka/dograh-copy/commit/8d05c9f8909dfacb1905aa383cf58989ee57020f))
+* release package name and add write permission for 'comment on release' step of deployment action ([#31](https://github.com/chewwbaka/dograh-copy/issues/31)) ([b9d1720](https://github.com/chewwbaka/dograh-copy/commit/b9d1720d94a5723836d5170de321e4602a59d6d7))
+* release-please config merge conflict ([af912eb](https://github.com/chewwbaka/dograh-copy/commit/af912eb3636bac742f7bd8de42d8b908fd079f1a))
+* slack annoucement workflow ([#46](https://github.com/chewwbaka/dograh-copy/issues/46)) ([dc6d696](https://github.com/chewwbaka/dograh-copy/commit/dc6d696af61225b4782dfea14868b398a2aa649e))
+* slack announcement workflow ([a0953b8](https://github.com/chewwbaka/dograh-copy/commit/a0953b8199ca90f97690300c18934a228bc34a31))
+* telephony bugs and improve code structure ([#38](https://github.com/chewwbaka/dograh-copy/issues/38)) ([d58f37f](https://github.com/chewwbaka/dograh-copy/commit/d58f37ff42c19797771305cf6c59ec381ac90e44))
+
+
+### Documentation
+
+* add video for vonage config ([#40](https://github.com/chewwbaka/dograh-copy/issues/40)) ([dca4904](https://github.com/chewwbaka/dograh-copy/commit/dca4904e382151f3d6adb3aa94cef8390e74ac5e))
+
 ## [1.2.0](https://github.com/dograh-hq/dograh/compare/dograh-v1.1.0...dograh-v1.2.0) (2025-11-06)
 
 
