@@ -120,6 +120,6 @@ jobs:
         if: steps.check.outputs.is_announcement == 'true'
         uses: slackapi/slack-github-action@v1
         with:
-          payload: ${{ steps.prepare_message.outputs.slack_payload }}
+          payload: ${{ fromJSON(steps.prepare_message.outputs.slack_payload) }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DOGRAH_COMMUNITY_WEBHOOK_URL }}
