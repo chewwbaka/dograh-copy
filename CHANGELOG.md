@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.3.0...dograh-copy-v1.3.1) (2025-11-12)
+
+
+### Bug Fixes
+
+* ui Dockerfile ([45c9d9a](https://github.com/chewwbaka/dograh-copy/commit/45c9d9a3da1f1797af456d48d9db01b75418a654))
+
 ## [1.3.0](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.2.0...dograh-copy-v1.3.0) (2025-11-10)
 
 
