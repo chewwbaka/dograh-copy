@@ -11,9 +11,7 @@ RUN apk add --no-cache python3 make g++ libc6-compat
 COPY ui/package*.json ./
 
 # Clean install with proper handling of native modules
-# First remove any existing lock file issues, then install with platform-specific binaries
-RUN rm -rf node_modules package-lock.json && \
-    npm install && \
+RUN rm -rf node_modules && \
     npm ci || npm install
 
 # Stage 2: Builder
