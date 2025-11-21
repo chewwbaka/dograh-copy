@@ -22,104 +22,31 @@ jobs:
             echo "is_announcement=false" >> $GITHUB_OUTPUT
           fi
           
+      - name: Checkout repository
+        if: steps.check.outputs.is_announcement == 'true'
+        uses: actions/checkout@v4
+
       - name: Prepare Slack Message
         if: steps.check.outputs.is_announcement == 'true'
         id: prepare_message
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const title = context.payload.discussion.title;
-            let body = context.payload.discussion.body;
-            const url = context.payload.discussion.html_url;
-            
-            // Convert GitHub markdown to Slack mrkdwn format
-            function convertToSlackFormat(text) {
-              // Convert headers (## Header -> *Header*)
-              text = text.replace(/^#{1,6}\s+(.+)$/gm, '*$1*');
-              
-              // Convert code blocks to inline code (```code``` -> `code`)
-              text = text.replace(/```[\s\S]*?```/g, (match) => {
-                const code = match.replace(/```\w*\n?/g, '').trim();
-                return '`' + code + '`';
-              });
-              
-              // Convert HTML breaks to newlines
-              text = text.replace(/<br\s*\/?>/gi, '\n');
-              
-              // Convert markdown links [text](url) to Slack format <url|text>
-              text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<$2|$1>');
-              
-              // Convert tables to bullet points (simple approach)
-              text = text.replace(/\|[^\n]+\|/g, (match) => {
-                if (match.includes('---|')) return ''; // Skip separator rows
-                return match.replace(/\s*\|\s*/g, ' • ').replace(/^•\s*/, '').replace(/\s*•$/, '');
-              });
-              
-              // Ensure bold text uses Slack format
-              text = text.replace(/\*\*([^*]+)\*\*/g, '*$1*');
-              
-              // Clean up excessive newlines
-              text = text.replace(/\n{3,}/g, '\n\n');
-              
-              return text;
-            }
-            
-            let slackBody = convertToSlackFormat(body);
-            
-            // Truncate if too long (Slack limit)
-            const maxLength = 2500;
-            if (slackBody.length > maxLength) {
-              slackBody = slackBody.substring(0, maxLength) + '...\n\n_View full announcement on GitHub_';
-            }
-            
-            const payload = {
-              text: `New Announcement: ${title}`,
-              blocks: [
-                {
-                  type: "header",
-                  text: {
-                    type: "plain_text",
-                    text: "📢 New Announcement",
-                    emoji: true
-                  }
-                },
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: `*${title}*`
-                  }
-                },
-                {
-                  type: "divider"
-                },
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: slackBody
-                  }
-                },
-                {
-                  type: "divider"
-                },
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: `<${url}|View full discussion on GitHub>`
-                  }
-                }
-              ]
-            };
-            
-            // Set the output for the next step
-            core.setOutput('slack_payload', JSON.stringify(payload));
-            
+        run: |
+          # Run the script with environment variables to avoid shell parsing issues
+          PAYLOAD=$(./scripts/prepare-slack-message.sh)
+          
+          # Set output for next step
+          echo "slack_payload<<EOF" >> $GITHUB_OUTPUT
+          echo "$PAYLOAD" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          DISCUSSION_TITLE: ${{ github.event.discussion.title }}
+          DISCUSSION_BODY: ${{ github.event.discussion.body }}
+          DISCUSSION_URL: ${{ github.event.discussion.html_url }}
       - name: Post to Slack
         if: steps.check.outputs.is_announcement == 'true'
-        uses: slackapi/slack-github-action@v1
+        uses: 8398a7/action-slack@v3
         with:
-          payload: ${{ fromJSON(steps.prepare_message.outputs.slack_payload) }}
+          status: custom
+          custom_payload: |
+            ${{ steps.prepare_message.outputs.slack_payload }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DOGRAH_COMMUNITY_WEBHOOK_URL }}
