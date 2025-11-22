@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.3.1...dograh-copy-v1.3.2) (2025-11-22)
+
+
+### Bug Fixes
+
+* syntax error ([5125e46](https://github.com/chewwbaka/dograh-copy/commit/5125e46fb8caf875491b3e2ebd70cd90706893b0))
+
 ## [1.3.1](https://github.com/chewwbaka/dograh-copy/compare/dograh-copy-v1.3.0...dograh-copy-v1.3.1) (2025-11-12)
 
 
